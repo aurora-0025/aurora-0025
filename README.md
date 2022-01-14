@@ -1,6 +1,6 @@
 - 👋 Hi, I’m @aurora-0025
 - 💻 Javascript/Python enthusiast!
-- 📘 Self taught programmer
+- 📘 Learning shell scripting and golang
 ---
 ### Languages and Tools I use:
 
