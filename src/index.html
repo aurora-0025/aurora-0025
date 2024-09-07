@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Website</title>
+	<link rel="stylesheet" href="style.css" />
+	<link rel="stylesheet" href="css-reset.css" />
+</head>
+
+<body>
+	<div id="container">
+		<div id="profile-pic"></div>
+		<h1><i>Ritin George<span style="color: #00afaf;"> *</span></i></h1>
+		<p>
+			Aspiring software engineer based in Kerala, India. Currently I work
+			on building web apps and IOT. This site is a work in progress. In the
+			meantime, you can see more here or feel free to get in touch.
+		</p>
+		<hr class="wavy">
+		<h2>My Projects</h2>
+		<ul id="projects-container">
+			<input id="moreButton" type="button" value="More" onclick="showMoreProjects()"/>
+			<input id="lessButton" type="button" value="Less" onclick="showLessProjects()"/>
+		</ul>
+		<hr>
+		<h2>Bucket List</h2>
+		<ul>
+			<li><input data-progress="100" type="checkbox" disabled checked class="status-check"></input> Jump in ariver
+			</li>
+			<li><input data-progress="50" type="checkbox" disabled class="status-check"></input> Reach Diamond</li>
+			<li><input data-progress="0" type="checkbox" disabled class="status-check"></input> Get A Job</li>
+			<li><input data-progress="50" type="checkbox" disabled class="status-check"></input> Touch Grass</li>
+			<li><input data-progress="100" type="checkbox" disabled checked class="status-check"></input> Watch The Goat
+				Life
+			</li>
+		</ul>
+		<hr>
+		<h2>Recent Media</h2>
+		<div class="media-container">
+			<div id="spotify-card">
+				<div class="album-art-container">
+					<div class="record"></div>
+					<img src="" alt="">
+				</div>
+				<div class="track-details">
+					<p class="track-name"></p>
+					<p class="last-played"></p>
+				</div>
+			</div>
+			<div id="movie-card">
+				<div class="poster-art-container">
+					<img src="" alt="">
+				</div>
+				<div class="movie-details">
+					<p class="name"></p>
+					<p class="rating">⭐</p>
+					<p class="last-played"></p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="index.js"></script>
+</body>
+
+</html>
