@@ -1,6 +1,6 @@
 let profilePic = document.getElementById("profile-pic");
 let container = document.getElementById("container");
-profilePic.style.left = `${container.offsetLeft}px`;
+profilePic.style.left = `${container.offsetLeft + 20}px`;
 profilePic.style.top = `${container.offsetTop}px`;
 
 //https://stackoverflow.com/questions/6108819/javascript-timestamp-to-relative-time
@@ -24,8 +24,63 @@ var getRelativeTime = (d1, d2 = new Date()) => {
             return rtf.format(Math.round(elapsed / units[u]), u)
 }
 
+async function hashText(text) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(text);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');    
+    return hashHex;
+}
+
+async function hashToImage(name) {
+    const hash = await hashText(name);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const gridSize = 5;
+    const cellSize = 20;
+    canvas.width = gridSize * cellSize;
+    canvas.height = gridSize * cellSize;
+    let binaryString = '';
+
+    for (let i = 0; i < hash.length; i++) {
+        const binary = parseInt(hash[i], 16).toString(2).padStart(4, '0');        
+        binaryString += binary;
+    }    
+    
+    for (let row = 0; row < 5; row++) {
+        const gridRow = [];
+        for (let col = 0; col < 3; col++) {
+            gridRow.push(binaryString[row * 3 + col] === '1' ? 1 : 0);
+            if (gridRow[col] === 1) {
+                ctx.fillStyle = 'black';
+            } else {
+                ctx.fillStyle = 'white';
+            }
+            ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+        }
+        console.log([...gridRow, gridRow[1], gridRow[0]]);
+        
+        if (gridRow[1] === 1) {
+            ctx.fillStyle = 'black';
+        } else {
+            ctx.fillStyle = 'white';
+        }
+        ctx.fillRect(3 * cellSize, row * cellSize, cellSize, cellSize);
+        if (gridRow[0] === 1) {
+            ctx.fillStyle = 'black';
+        } else {
+            ctx.fillStyle = 'white';
+        }
+        ctx.fillRect(4 * cellSize, row * cellSize, cellSize, cellSize);
+    }
+    return canvas.toDataURL();
+}
+
+
 async function getRecentlyPlayedSong() {
-    const response = await fetch("http://www.api.ritt.in/last-played-song");
+    const response = await fetch("https://www.api.ritt.in/last-played-song");
     let data = await response.json();
     let playing = false;
     const playerData = {};
@@ -54,7 +109,7 @@ async function getRecentlyPlayedSong() {
 }
 
 async function getRecentlyPlayedMovie() {
-    const response = await fetch("http://www.api.ritt.in/last-played-movie");
+    const response = await fetch("https://www.api.ritt.in/last-played-movie");
     let data = await response.json();
 
     const movieCard = document.getElementById("movie-card");
@@ -86,7 +141,7 @@ async function getProjectDetails() {
                 desc: repo.description || "No Description Provided",
                 date_created: repo.created_at,
                 website: repo.homepage || null,
-                github_url: repo.git_url.replace("git://", "https://www.").slice(0,-4)
+                github_url: repo.git_url.replace("git://", "https://www.").slice(0, -4)
                 // image: imgTags ? imgTags[0].slice(5, -1) : null,
             };
             filtered_repos.push(details);
@@ -105,19 +160,21 @@ async function fetchProjectImage(name, branch) {
         );
         const imgTagRegex = /src="https:\/\/.*?"/;
         const imgTags = (await response.text()).match(imgTagRegex);
-        return imgTags ? imgTags[0].slice(5, -1) : null;
+        return imgTags ? imgTags[0].slice(5, -1) : await hashToImage(name);
     } catch (error) {
-        console.log(error);
-        return null;
+        // console.log(error);
+        return await hashToImage(name);
     }
 
 }
 
 function lazyLoadImage(name, branch, imgElement, projectDiv) {
     fetchProjectImage(name, branch).then((imageUrl) => {
-        if (imageUrl) {
+        if (imageUrl) {            
             imgElement.src = imageUrl;
             imgElement.classList.add("loaded")
+        } else {
+            imgElement.classList.add("not-loaded")
         }
     });
 }
@@ -125,58 +182,55 @@ function lazyLoadImage(name, branch, imgElement, projectDiv) {
 function showMoreProjects() {
     var listData = Array.prototype.slice.call(document.querySelectorAll('#projects-container li:not(.shown)')).slice(0, 3);
 
-    for (var i=0; i < listData.length; i++)
-    {
-      listData[i].className  = 'shown';
+    for (var i = 0; i < listData.length; i++) {
+        listData[i].className = 'project shown';
     }
     switchButtons();
 }
 
 function showLessProjects() {
     var listData = Array.prototype.slice.call(document.querySelectorAll('#projects-container li:not(.hidden)')).slice(-3);
-  for (var i=0; i < listData.length; i++)
-  {
-    listData[i].className  = 'hidden';
-  }
-  switchButtons();
+    for (var i = 0; i < listData.length; i++) {
+        listData[i].className = 'project hidden';
+    }
+    switchButtons();
 }
 
 function switchButtons() {
     var hiddenElements = Array.prototype.slice.call(document.querySelectorAll('#projects-container li:not(.shown)'));
-  if(hiddenElements.length == 0)
-  {
-    document.getElementById('moreButton').style.display = 'none';
-  }
-  else
-  {
-    document.getElementById('moreButton').style.display = 'block';
-  }
+    if (hiddenElements.length == 0) {
+        document.getElementById('moreButton').style.display = 'none';
+    }
+    else {
+        document.getElementById('moreButton').style.display = 'block';
+    }
 
-  var shownElements = Array.prototype.slice.call(document.querySelectorAll('#projects-container li:not(.hidden)'));
-  if(shownElements.length == 0)
-  {
-    document.getElementById('lessButton').style.display = 'none';
-  }
-  else
-  {
-    document.getElementById('lessButton').style.display = 'block';
-  }
+    var shownElements = Array.prototype.slice.call(document.querySelectorAll('#projects-container li:not(.hidden)'));
+    if (shownElements.length == 0) {
+        document.getElementById('lessButton').style.display = 'none';
+    }
+    else {
+        document.getElementById('lessButton').style.display = 'block';
+    }
 }
 
 getProjectDetails().then((details) => {
     details.forEach((project, i) => {
-        console.log(project);
-
         const container = document.getElementById("projects-container");
         const projectDiv = document.createElement("li");
         projectDiv.classList.add("project");
-        projectDiv.classList.add("hidden");
-        projectDiv.style = `opacity:0; animation-name: fadeIn; animation-duration: 1s; animation-delay: ${i * 0.1}s; animation-fill-mode:forwards`
+        if (i > 2) projectDiv.classList.add("hidden");
+        else projectDiv.classList.add("shown");
+        projectDiv.style = `opacity:0; display:none; animation-name: fadeIn; animation-duration: 0.5s; animation-delay: ${i%3 * 0.1}s; animation-fill-mode:forwards`
         projectDiv.innerHTML = `
-                <img src="" alt="${project.name} image">
+                <img src=""></img>
                 <div class="project-details">
-                    <h3>${project.name}</h3>
-                    <p>${new Date(project.date_created).getFullYear()}</p>
+                    <div class="project-name">
+                        <h3>${project.name}</h3>
+                    </div>
+                    <div class="project-date">
+                        <p>${new Date(project.date_created).getFullYear()}</p>
+                    </div>
                     <div class="links">
                         ${project.github_url ? `<a class="github" target="_blank" href="${project.github_url}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
   <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
@@ -189,7 +243,7 @@ getProjectDetails().then((details) => {
                 </div>
         `
 
-        projectImage = projectDiv.getElementsByTagName("img")[0];
+        let projectImage = projectDiv.getElementsByTagName("img")[0];
         container.appendChild(projectDiv);
         lazyLoadImage(project.name, project.default_branch, projectImage, projectDiv);
     })
@@ -198,7 +252,7 @@ getRecentlyPlayedSong();
 getRecentlyPlayedMovie();
 
 window.addEventListener("resize", () => {
-    profilePic.style.left = `${container.offsetLeft}px`;
+    profilePic.style.left = `${container.offsetLeft + 20}px`;
     profilePic.style.top = `${container.offsetTop}px`;
 })
 
@@ -210,6 +264,11 @@ profilePic.addEventListener("click", (e) => {
     profilePic.style.borderRadius = "0"
     profilePic.classList.add("openAnimation");
 });
+
+profilePic.addEventListener("animationend", () => {
+    profilePic.style.borderRadius = "50%"
+    profilePic.classList.remove("openAnimation");
+})
 
 /**
  * @typedef {Object} Repository
