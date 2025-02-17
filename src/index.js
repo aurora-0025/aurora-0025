@@ -108,16 +108,16 @@ async function getRecentlyPlayedSong() {
     }
 }
 
-async function getRecentlyPlayedMovie() {
-    const response = await fetch("https://www.api.ritt.in/last-played-movie");
-    let data = await response.json();
+// async function getRecentlyPlayedMovie() {
+//     const response = await fetch("https://www.api.ritt.in/last-played-movie");
+//     let data = await response.json();
 
-    const movieCard = document.getElementById("movie-card");
-    movieCard.getElementsByTagName("p")[0].innerText = data.name;
-    movieCard.getElementsByTagName("img")[0].src = data.posterImg;
-    movieCard.getElementsByClassName("last-played")[0].innerText = `Last Played ${getRelativeTime(new Date(data.lastPlayedDate))}`;
-    movieCard.getElementsByClassName("rating")[0].innerText = `⭐ ${parseFloat(data.rating).toFixed(1)}`;
-}
+//     const movieCard = document.getElementById("movie-card");
+//     movieCard.getElementsByTagName("p")[0].innerText = data.name;
+//     movieCard.getElementsByTagName("img")[0].src = data.posterImg;
+//     movieCard.getElementsByClassName("last-played")[0].innerText = `Last Played ${getRelativeTime(new Date(data.lastPlayedDate))}`;
+//     movieCard.getElementsByClassName("rating")[0].innerText = `⭐ ${parseFloat(data.rating).toFixed(1)}`;
+// }
 
 async function getProjectDetails() {
     try {
@@ -256,19 +256,19 @@ window.addEventListener("resize", () => {
     profilePic.style.top = `${container.offsetTop}px`;
 })
 
-profilePic.addEventListener("animationstart", () => {
-    window.location.href = "https://github.com/aurora-0025";
-})
+// profilePic.addEventListener("animationstart", () => {
+//     window.location.href = "https://github.com/aurora-0025";
+// })
 
-profilePic.addEventListener("click", (e) => {
-    profilePic.style.borderRadius = "0"
-    profilePic.classList.add("openAnimation");
-});
+// profilePic.addEventListener("click", (e) => {
+//     profilePic.style.borderRadius = "0"
+//     profilePic.classList.add("openAnimation");
+// });
 
-profilePic.addEventListener("animationend", () => {
-    profilePic.style.borderRadius = "50%"
-    profilePic.classList.remove("openAnimation");
-})
+// profilePic.addEventListener("animationend", () => {
+//     profilePic.style.borderRadius = "50%"
+//     profilePic.classList.remove("openAnimation");
+// })
 
 /**
  * @typedef {Object} Repository
