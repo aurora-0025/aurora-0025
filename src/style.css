@@ -95,6 +95,7 @@ h2 {
 }
 
 #projects-container {
+  min-height: 242px;
   display: flex;
   flex-direction: column;
   gap: 1rem;

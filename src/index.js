@@ -223,7 +223,7 @@ getProjectDetails().then((details) => {
         else projectDiv.classList.add("shown");
         projectDiv.style = `opacity:0; display:none; animation-name: fadeIn; animation-duration: 0.5s; animation-delay: ${i%3 * 0.1}s; animation-fill-mode:forwards`
         projectDiv.innerHTML = `
-                <img src=""></img>
+                <img src="" alt="${project.name} logo"></img>
                 <div class="project-details">
                     <div class="project-name">
                         <h3>${project.name}</h3>
